@@ -10,6 +10,10 @@ migrate.init_app(app, db)
 
 from models import Hero, Power, HeroPower
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({'message': 'Welcome to the Superheroes API!'})
+
 @app.route('/heroes', methods=['GET'])
 def get_heroes():
     heroes = Hero.query.all()
@@ -73,6 +77,20 @@ def update_power(id):
 @app.route('/hero_powers', methods=['POST'])
 def create_hero_power():
     data = request.get_json()
+
+    # Validate required fields
+    if not all(key in data for key in ['strength', 'hero_id', 'power_id']):
+        return jsonify({'errors': ['strength, hero_id and power_id are required']}), 400
+
+    # Check if hero and power exist
+    hero = Hero.query.get(data['hero_id'])
+    if not hero:
+        return jsonify({'errors': ['Hero not found']}), 404
+
+    power = Power.query.get(data['power_id'])
+    if not power:
+        return jsonify({'errors': ['Power not found']}), 404
+
     try:
         hero_power = HeroPower(
             strength=data['strength'],
@@ -82,24 +100,10 @@ def create_hero_power():
         db.session.add(hero_power)
         db.session.commit()
 
-        hero = Hero.query.get(data['hero_id'])
-        power = Power.query.get(data['power_id'])
-
         return jsonify({
-            'id': hero_power.id,
-            'hero_id': hero_power.hero_id,
-            'power_id': hero_power.power_id,
             'strength': hero_power.strength,
-            'hero': {
-                'id': hero.id,
-                'name': hero.name,
-                'super_name': hero.super_name
-            },
-            'power': {
-                'id': power.id,
-                'name': power.name,
-                'description': power.description
-            }
+            'power_id': hero_power.power_id,
+            'hero_id': hero_power.hero_id
         }), 201
     except ValueError as e:
         return jsonify({'errors': [str(e)]}), 400
