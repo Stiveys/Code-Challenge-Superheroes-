@@ -1,8 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db
 from sqlalchemy.orm import validates
 import re
-
-db = SQLAlchemy()
 
 class Hero(db.Model):
     __tablename__ = 'heroes'
