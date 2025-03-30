@@ -40,6 +40,9 @@ def test_update_power(id, description):
     print(json.dumps(response.json(), indent=2))
     print('\n' + '-'*50 + '\n')
 
+if __name__ == '__main__':
+    test_update_power(1, "gives the wielder super-human strengths")
+
 def test_create_hero_power(hero_id, power_id, strength):
     headers = {'Content-Type': 'application/json'}
     data = {
